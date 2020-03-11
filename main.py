@@ -5,36 +5,39 @@ chain multiple units to give you move outputs.
 In this case I used an Adafruit ItsyBitsy M4 but your more likely to use it on a 
 board with limited pins like the Trinket M0
 
-cmos 595         pin   Itsybitsy M4
-----------------+-----+------------
-serial in         ?      D?
-clock             ?      D?
-latch             ?      D?
+cmos 595     pin   Itsybitsy M4
+-----------+-----+------------
+serial in    14      D9
+latch        12      D7
+clock        11      D5
 
+OE           13      Gnd
+MR           10      Vcc
 """
-
 import time
 import board
 import digitalio
 import simpleio
 
 # set up clock, data, and latch pins
-clk = digitalio.DigitalInOut(board.D3)
-clk.direction = digitalio.Direction.OUTPUT
-data = digitalio.DigitalInOut(board.D2)
-data.direction = digitalio.Direction.INPUT
-latch = digitalio.DigitalInOut(board.D0)
+data = digitalio.DigitalInOut(board.D9)
+data.direction = digitalio.Direction.OUTPUT
+latch = digitalio.DigitalInOut(board.D7)
 latch.direction = digitalio.Direction.OUTPUT
+clk = digitalio.DigitalInOut(board.D5)
+clk.direction = digitalio.Direction.OUTPUT
 
-# insert a small pause after keypress
-def qpause():
-    time.sleep(0.2)
-
+ff = 0  # flip flop
 while True:
-    latch.value = False
-    #rs = not(rs)
-    #rs= simpleio.shift_in(data, clk) 
-    #print("output: {0:#010b} {0}".format(rs),end="")
-    latch.value = True
+    ff = 1-ff
+    if (ff==1):
+       byte = 255
+    else:
+        byte = 0
 
-    time.sleep(0.05)
+    # write to 595 chip
+    latch.value = False
+    simpleio.shift_out(data, clk, byte) 
+    print("sending: {0:#010b} {0}".format(byte),end="\n")
+    latch.value = True
+    time.sleep(0.25)
