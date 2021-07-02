@@ -13,6 +13,9 @@ clock        11      D5
 
 OE           13      Gnd
 MR           10      Vcc
+
+here is a change!
+
 """
 import time
 import board
